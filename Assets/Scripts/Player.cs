@@ -1,8 +1,6 @@
 using UnityEngine;
-
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 public class Player : MonoBehaviour
@@ -109,6 +107,20 @@ public class Player : MonoBehaviour
             isGrounded = true;
             jumpCnt = 0; // 땅에 닿으면 점프 횟수 초기화
         }
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            StartCoroutine(ReduceGravityTemporarily());
+            isGrounded = true;
+            jumpCnt = 0; // 땅에 닿으면 점프 횟수 초기화
+        }
+    }
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Wall"))
+        {
+            rbody.gravityScale = 1.0f;
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -143,5 +155,18 @@ public class Player : MonoBehaviour
     public void GameStop()
     {
         rbody.velocity = Vector2.zero;
+    }
+
+    IEnumerator ReduceGravityTemporarily()
+    {
+        float originalGravity = rbody.gravityScale; // 원래 그래비티 스케일 값 저장
+        rbody.gravityScale = 0.1f; // 그래비티를 반으로 줄임
+        rbody.velocity = Vector2.zero;
+
+        // 원하는 시간만큼 일시적으로 그래비티를 낮춰둡니다
+        yield return new WaitForSeconds(100f);
+
+        // 시간이 지나면 원래 값으로 복원
+        rbody.gravityScale = originalGravity;
     }
 }
