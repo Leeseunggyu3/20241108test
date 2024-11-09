@@ -7,8 +7,11 @@ public class GappingHook : MonoBehaviour
     public LineRenderer line;
     public Transform hook;
     Vector2 mousedir;
+
+
     public bool isHookActive;
     public bool isLineMax;
+    public bool isAttach;
     void Start()
     {
         line.positionCount = 2;
@@ -16,6 +19,7 @@ public class GappingHook : MonoBehaviour
         line.SetPosition(0,transform.position);
         line.SetPosition(1,hook.position);
         line.useWorldSpace= true;
+        isAttach = false;
     }
 
     // Update is called once per frame
@@ -29,15 +33,36 @@ public class GappingHook : MonoBehaviour
             hook.position = transform.position; 
             mousedir = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
             isHookActive = true;
+            hook.gameObject.SetActive(true);
         }
 
-        if(isHookActive && !isLineMax)
+        if (isHookActive && !isLineMax && !isAttach)
         {
-            hook.Translate(mousedir.normalized * Time.deltaTime * 10);
+            hook.Translate(mousedir.normalized * Time.deltaTime * 15);
 
-            if(Vector2.Distance(transform.position,hook.position)>5)
+            if (Vector2.Distance(transform.position, hook.position) > 5)
             {
-                isLineMax = true;    
+                isLineMax = true;
+            }
+        }
+        else if (isHookActive && isLineMax && !isAttach)
+        {
+            hook.position=Vector2.MoveTowards(hook.position,transform.position,Time.deltaTime*15);
+            if(Vector2.Distance(transform.position,hook.position) < 0.1f)
+            {
+                isHookActive=false; 
+                isLineMax=false;
+                hook.gameObject.SetActive(false);
+            }
+        }
+        else if (isAttach)
+        {
+            if (Input.GetKeyDown(KeyCode.E)) { 
+            isAttach = false;
+            isHookActive =false;
+            isLineMax = false;
+            hook.GetComponent<Hookg>().joint2D.enabled = false;
+            hook.gameObject.SetActive(false) ;
             }
         }
     }
