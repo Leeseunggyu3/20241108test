@@ -16,11 +16,11 @@ public class Player_Move_test : MonoBehaviour
 
     public static string GameState = "Playing";
 
-    public string IdleAnime = "Knight_Idle";
-    public string WalkAnime = "Knight_walk";
-    public string JumpAnime = "Knight_jump";
-    public string GoalAnime = "Knight_clear";
-    public string DeadAnime = "Knight_dead";
+    public string IdleAnime = "idle";
+    public string WalkAnime = "run";
+    public string JumpAnime = "jump";
+    public string GoalAnime = "idle";
+    public string DeadAnime = "hurt";
 
     string nowAnime = "";
 
