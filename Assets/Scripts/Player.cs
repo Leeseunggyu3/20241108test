@@ -1,3 +1,5 @@
+using UnityEngine;
+
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -8,21 +10,21 @@ public class Player : MonoBehaviour
     Rigidbody2D rbody;
     Animator animator;
 
-    public float speed = 5f;          //이동속도
-    public float jumpForce = 5f;      //점프 힘
-    public float MoveX, MoveY;
-    private bool isGrounded = true;   //땅바닥감지
+    public float speed = 5f;            // 이동속도
+    public float jumpForce = 5f;        // 점프 힘
+    public float MoveX;
+    private int jumpCnt = 0;            // 점프 횟수
+    private bool isGrounded = true;     // 땅바닥 감지
 
     public static string GameState = "Playing";
 
-    public string IdleAnime = "Idle";
+    public string IdleAnime = "idle";
     public string WalkAnime = "run";
     public string JumpAnime = "jump";
     public string GoalAnime = "idle";
     public string DeadAnime = "hurt";
 
     string nowAnime = "";
-    string oldAnime = "";
 
     private void Start()
     {
@@ -30,7 +32,6 @@ public class Player : MonoBehaviour
         animator = GetComponent<Animator>();
         GameState = "Playing";
         nowAnime = IdleAnime;
-        oldAnime = IdleAnime;
         animator.Play(IdleAnime, 0);
     }
 
@@ -42,44 +43,58 @@ public class Player : MonoBehaviour
         }
 
         MoveX = Input.GetAxis("Horizontal");
-        MoveY = Input.GetAxis("Vertical");
 
-        if (Input.GetKeyDown(KeyCode.W) && isGrounded)
+        // 점프 입력 처리
+        if (Input.GetKeyDown(KeyCode.W) && (isGrounded || jumpCnt < 2))
         {
             Jump();
         }
 
-        if (MoveX != 0.0f || MoveY != 0.0f)
+        // 애니메이션 업데이트
+        if (isGrounded)
         {
-            if (MoveX > 0.0f)
+            if (MoveX != 0.0f)
             {
-                transform.localScale = new Vector3(1, 1);
+                transform.localScale = new Vector3(MoveX > 0 ? 1 : -1, 1);
                 PlayAnimation(WalkAnime);
             }
-            else if (MoveX < 0.0f)
+            else
             {
-                transform.localScale = new Vector3(-1, 1);
-                PlayAnimation(WalkAnime);
+                PlayAnimation(IdleAnime);
             }
         }
         else
         {
-            PlayAnimation(IdleAnime);
+            PlayAnimation(JumpAnime);
         }
+    }
 
-        Vector2 movement = new Vector2(MoveX, MoveY) * speed * Time.deltaTime;
+    void FixedUpdate()
+    {
+        Vector2 movement = new Vector2(MoveX, 0) * speed * Time.fixedDeltaTime;
         transform.Translate(movement);
     }
 
     void Jump()
     {
+        rbody.velocity = Vector2.zero; // 점프 시 속도 초기화
         rbody.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
         PlayAnimation(JumpAnime);
-        isGrounded = false;
+
+
+        if (MoveX != 0.0f)
+        {
+            transform.localScale = new Vector3(MoveX > 0 ? 1 : -1, 1);
+        }
+            // 점프 후 상태 업데이트
+            jumpCnt++;                    // 점프 횟수 증가
+        isGrounded = false;           // 공중에 있을 때는 땅에 닿지 않은 상태
     }
 
     void PlayAnimation(string animationName)
     {
+        if (animator == null) return;  // Animator가 없으면 실행하지 않음
+
         if (nowAnime != animationName)
         {
             nowAnime = animationName;
@@ -92,6 +107,7 @@ public class Player : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+            jumpCnt = 0; // 땅에 닿으면 점프 횟수 초기화
         }
     }
 
@@ -120,8 +136,8 @@ public class Player : MonoBehaviour
         GameState = "GameOver";
         PlayAnimation(DeadAnime);
 
-        GetComponent<CapsuleCollider2D>().enabled = false;          //충돌무시
-        rbody.AddForce(new Vector2(0, 2), ForceMode2D.Impulse);     //위로 살짝 튐
+        GetComponent<CapsuleCollider2D>().enabled = false;          // 충돌 무시
+        rbody.AddForce(new Vector2(0, 2), ForceMode2D.Impulse);     // 위로 살짝 튐
     }
 
     public void GameStop()
