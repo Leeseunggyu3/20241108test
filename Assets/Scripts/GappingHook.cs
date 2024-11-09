@@ -33,6 +33,7 @@ public class GappingHook : MonoBehaviour
             hook.position = transform.position; 
             mousedir = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
             isHookActive = true;
+            isLineMax = false;
             hook.gameObject.SetActive(true);
         }
 
