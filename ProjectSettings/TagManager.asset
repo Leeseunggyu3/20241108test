@@ -8,6 +8,7 @@ TagManager:
   - Ring
   - Dead
   - Clear
+  - Wall
   layers:
   - Default
   - TransparentFX
