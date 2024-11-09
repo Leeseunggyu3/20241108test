@@ -24,6 +24,26 @@ public class Player : MonoBehaviour
     public string GoalAnime = "idle";
     public string DeadAnime = "hurt";
 
+    public float isRight = 1; //1이면 우측방향, -1이면 좌측방향
+
+
+    public Transform wallChk;
+    public float wallchkDistance;
+    public LayerMask w_Layer;
+    public float SlidingSpeed;
+
+
+
+
+
+    bool isWall;
+
+
+
+
+
+
+
     string nowAnime = "";
 
     private void Start()
@@ -37,12 +57,39 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+
+
+
+
+
+
+
+
+       isWall = Physics2D.Raycast(wallChk.position, Vector2.right*isRight, wallchkDistance, w_Layer);
+        animator.SetBool("", isWall);
+            
+
+
+
+
+
         if (GameState != "Playing")
         {
             return;
         }
 
         MoveX = Input.GetAxis("Horizontal");
+
+
+        if(MoveX > 0)
+        {
+            isRight = 1;
+        }
+        else if (MoveX < 0)
+        {
+            isRight = -1;
+        }
+
 
         // 점프 입력 처리
         if (Input.GetKeyDown(KeyCode.W) && (isGrounded || jumpCnt < 2))
@@ -55,6 +102,7 @@ public class Player : MonoBehaviour
         {
             if (MoveX != 0.0f)
             {
+                
                 transform.localScale = new Vector3(MoveX > 0 ? 1 : -1, 1);
                 PlayAnimation(WalkAnime);
             }
@@ -73,6 +121,17 @@ public class Player : MonoBehaviour
     {
         Vector2 movement = new Vector2(MoveX, 0) * speed * Time.fixedDeltaTime;
         transform.Translate(movement);
+
+
+
+
+
+        if (isWall)
+        {
+            rbody.velocity = new Vector2(rbody.velocity.x, rbody.velocity.y*SlidingSpeed);
+
+        }
+
     }
 
     void Jump()
@@ -144,4 +203,12 @@ public class Player : MonoBehaviour
     {
         rbody.velocity = Vector2.zero;
     }
+
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.blue;
+        Gizmos.DrawRay(wallChk.position, Vector2.right * isRight * wallchkDistance);
+    }
+
+
 }

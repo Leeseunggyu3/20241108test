@@ -28,7 +28,7 @@ public class GappingHook : MonoBehaviour
         line.SetPosition(0, transform.position);
         line.SetPosition(1, hook.position);
 
-        if(Input.GetKeyDown(KeyCode.E) && !isHookActive)
+        if(Input.GetMouseButtonDown(0) && !isHookActive)
         {
             hook.position = transform.position; 
             mousedir = Camera.main.ScreenToWorldPoint(Input.mousePosition) - transform.position;
@@ -57,7 +57,7 @@ public class GappingHook : MonoBehaviour
         }
         else if (isAttach)
         {
-            if (Input.GetKeyDown(KeyCode.E)) { 
+            if (Input.GetMouseButtonDown(0)) { 
             isAttach = false;
             isHookActive =false;
             isLineMax = false;
